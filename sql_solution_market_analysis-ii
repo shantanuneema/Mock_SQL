@@ -1,0 +1,17 @@
+-- Solution to https://leetcode.com/problems/market-analysis-ii/
+WITH CTE_all AS (
+    SELECT o.*, it.item_brand, RANK() OVER (PARTITION BY seller_id ORDER BY order_date) AS 'rnk'
+    FROM Orders o JOIN Items it
+    ON it.item_id = o.item_id
+),
+CTE_rank AS (
+    SELECT * FROM CTE_all
+    WHERE rnk = 2
+)
+SELECT u.user_id AS seller_id, 
+    CASE WHEN u.favorite_brand = c.item_brand THEN 'yes'
+    ELSE 'no'
+    END AS 2nd_item_fav_brand
+FROM CTE_rank c
+RIGHT JOIN Users u
+ON u.user_id = c.seller_id
