@@ -46,4 +46,24 @@ RIGHT JOIN Users u
 ON c.seller_id = u.user_id;
 
 -- Solution to https://leetcode.com/problems/tournament-winners/
+WITH CTE AS (
+    SELECT first_player AS player, first_score as score
+    FROM Matches
+    UNION ALL
+    SELECT second_player AS player, second_score as score
+    FROM Matches
+), 
+CTE_scores AS (
+    SELECT DISTINCT c.player, SUM(score) AS total_score, p.group_id
+    FROM CTE c 
+    LEFT JOIN Players p ON c.player = p.player_id
+    GROUP by c.player
+    ORDER BY total_score DESC, c.player ASC
+),
+CTE_net AS (
+    SELECT group_id, total_score, player as player_id FROM CTE_scores
+    GROUP BY group_id
+    HAVING total_score = MAX(total_score)
+)
+SELECT group_id, player_id FROM CTE_net
 
